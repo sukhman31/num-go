@@ -38,5 +38,5 @@ func main() {
 		return
 	}
 	fmt.Println("New value at [1,2,1]:", value)
-	fmt.Println(arr.Shape())
+	fmt.Println(arr.PrettyPrint())
 }
