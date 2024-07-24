@@ -18,17 +18,10 @@ func NewArray(data []float64, shape []int) (*Array, error) {
 		return nil, fmt.Errorf("data does not match the input shape")
 	}
 
-	strides := make([]int, len(shape))
-	stride := 1
-	for i := len(shape) - 1; i >= 0; i-- {
-		strides[i] = stride
-		stride *= shape[i]
-	}
-
 	return &Array{
 		data:    data,
 		shape:   shape,
-		strides: strides,
+		strides: getStrides(shape),
 	}, nil
 }
 
@@ -49,8 +42,36 @@ func (a *Array) At(indices ...int) (float64, error) {
 	return a.data[index], nil
 }
 
+func Zeros(shape []int) *Array{
+	return &Array{
+		data: make([]float64,utils.Product(shape)),
+		shape: shape,
+		strides: getStrides(shape),
+	}
+}
+
+func Ones(shape []int) *Array {
+	data := make([]float64,utils.Product(shape))
+	for idx,_ := range data {
+		data[idx] = 1
+	}
+	return &Array{
+		data: data,
+		shape: shape,
+		strides: getStrides(shape),
+	}
+}
+
 func (a *Array) Shape() []int {
 	return a.shape
+}
+
+func (a *Array) Ndim() int {
+	return len(a.shape)
+}
+
+func (a *Array) Size() int {
+	return utils.Product(a.shape)
 }
 
 func (a *Array) PrettyPrint() string {
@@ -90,4 +111,15 @@ func getValidIndex(indices []int, a Array) (int, error) {
 		index += idx * a.strides[i]
 	}
 	return index, nil
+}
+
+func getStrides(shape []int) []int{
+	strides := make([]int, len(shape))
+	stride := 1
+	for i := len(shape) - 1; i >= 0; i-- {
+		strides[i] = stride
+		stride *= shape[i]
+	}
+
+	return strides
 }
