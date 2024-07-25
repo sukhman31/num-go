@@ -2,6 +2,7 @@ package array
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/sukhman31/num-go/internal/utils"
@@ -52,7 +53,7 @@ func Zeros(shape []int) *Array{
 
 func Ones(shape []int) *Array {
 	data := make([]float64,utils.Product(shape))
-	for idx,_ := range data {
+	for idx := range data {
 		data[idx] = 1
 	}
 	return &Array{
@@ -60,6 +61,66 @@ func Ones(shape []int) *Array {
 		shape: shape,
 		strides: getStrides(shape),
 	}
+}
+
+func Arange(args ...interface{}) (*Array, error) {
+	switch (len(args)) {
+	case 1:
+		maxVal, ok := args[0].(int)
+		if !ok {
+			return nil, fmt.Errorf("value must be an integer")
+		}
+		return arangeOneArg(maxVal)
+	case 2:
+		minVal, ok1 := args[0].(int)
+		maxVal, ok2 := args[1].(int)
+		if !ok1 || !ok2 {
+			return nil, fmt.Errorf("both values must be integers")
+		}
+		return arangeTwoArgs(minVal, maxVal)
+	case 3:
+		minVal, ok1 := args[0].(int)
+		maxVal, ok2 := args[1].(int)
+		step, ok3 := args[2].(int)
+		if !ok1 || !ok2 || !ok3 {
+			return nil, fmt.Errorf("all values must be integers")
+		}
+		return arangeThreeArgs(minVal, maxVal, step)
+	default:
+        return nil, fmt.Errorf("arange accepts 1, 2, or 3 arguments")
+	}
+}
+
+
+func arangeOneArg(maxVal int) (*Array, error) {
+	return arange(0, maxVal, 1)
+}
+
+func arangeTwoArgs(minVal int, maxVal int) (*Array, error) {
+	return arange(minVal, maxVal, 1)
+}
+
+func arangeThreeArgs(minVal int, maxVal int, step int) (*Array, error) {
+	return arange(minVal, maxVal, step)
+}
+
+func arange(minVal int, maxVal int, step int) (*Array, error) {
+	if minVal > maxVal {
+		return nil, fmt.Errorf("minimum val cannot be greater than maximum value")
+	}
+	if step == 0 {
+		return nil, fmt.Errorf("step cannot be 0")
+	}
+	arraySize := math.Ceil(float64((maxVal-minVal))/float64(step))
+	data := make([]float64, int(arraySize))
+	for i := range data {
+		data[i] = float64(minVal + i*step)
+	}
+	return &Array{
+		data: data,
+		shape: []int{len(data), 1},
+		strides: getStrides([]int{len(data), 1}),
+	}, nil
 }
 
 func (a *Array) Shape() []int {
@@ -106,7 +167,7 @@ func getValidIndex(indices []int, a Array) (int, error) {
 	index := 0
 	for i, idx := range indices {
 		if idx < 0 || idx >= a.shape[i] {
-			return -1, fmt.Errorf("invalid index at position %d", i)
+			return -1, fmt.Errorf("invalid index at position: %d", i)
 		}
 		index += idx * a.strides[i]
 	}
