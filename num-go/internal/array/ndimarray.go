@@ -43,28 +43,28 @@ func (a *Array) At(indices ...int) (float64, error) {
 	return a.data[index], nil
 }
 
-func Zeros(shape []int) *Array{
+func Zeros(shape []int) *Array {
 	return &Array{
-		data: make([]float64,utils.Product(shape)),
-		shape: shape,
+		data:    make([]float64, utils.Product(shape)),
+		shape:   shape,
 		strides: getStrides(shape),
 	}
 }
 
 func Ones(shape []int) *Array {
-	data := make([]float64,utils.Product(shape))
+	data := make([]float64, utils.Product(shape))
 	for idx := range data {
 		data[idx] = 1
 	}
 	return &Array{
-		data: data,
-		shape: shape,
+		data:    data,
+		shape:   shape,
 		strides: getStrides(shape),
 	}
 }
 
 func Arange(args ...interface{}) (*Array, error) {
-	switch (len(args)) {
+	switch len(args) {
 	case 1:
 		maxVal, ok := args[0].(int)
 		if !ok {
@@ -87,10 +87,9 @@ func Arange(args ...interface{}) (*Array, error) {
 		}
 		return arangeThreeArgs(minVal, maxVal, step)
 	default:
-        return nil, fmt.Errorf("arange accepts 1, 2, or 3 arguments")
+		return nil, fmt.Errorf("arange accepts 1, 2, or 3 arguments")
 	}
 }
-
 
 func arangeOneArg(maxVal int) (*Array, error) {
 	return arange(0, maxVal, 1)
@@ -111,14 +110,14 @@ func arange(minVal int, maxVal int, step int) (*Array, error) {
 	if step == 0 {
 		return nil, fmt.Errorf("step cannot be 0")
 	}
-	arraySize := math.Ceil(float64((maxVal-minVal))/float64(step))
+	arraySize := math.Ceil(float64((maxVal - minVal)) / float64(step))
 	data := make([]float64, int(arraySize))
 	for i := range data {
 		data[i] = float64(minVal + i*step)
 	}
 	return &Array{
-		data: data,
-		shape: []int{len(data), 1},
+		data:    data,
+		shape:   []int{len(data), 1},
 		strides: getStrides([]int{len(data), 1}),
 	}, nil
 }
@@ -149,7 +148,7 @@ func (a *Array) prettyPrintRecursive(dimension int, indices []int) string {
 	result.WriteString("[")
 
 	for i := 0; i < a.shape[dimension]; i++ {
-		if i>0 {
+		if i > 0 {
 			result.WriteString(" ")
 		}
 		newIndices := append(indices, i)
@@ -174,7 +173,7 @@ func getValidIndex(indices []int, a Array) (int, error) {
 	return index, nil
 }
 
-func getStrides(shape []int) []int{
+func getStrides(shape []int) []int {
 	strides := make([]int, len(shape))
 	stride := 1
 	for i := len(shape) - 1; i >= 0; i-- {
