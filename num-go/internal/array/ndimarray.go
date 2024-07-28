@@ -122,6 +122,28 @@ func arange(minVal int, maxVal int, step int) (*Array, error) {
 	}, nil
 }
 
+func Linspace(minVal int, maxVal int, num int) (*Array, error){
+	if math.Mod(float64(maxVal-minVal), float64(num)) != 0 {
+		return nil, fmt.Errorf("cannot successfuly divide linear space in desired equal parts")
+	}
+	data := make([]float64,num)
+	step := float64(maxVal-minVal)/float64(num-1)
+	
+	for i := range num {
+		data[i] = float64(minVal) + float64(i)*step
+	}
+
+	if num > 1 {
+        data[num-1] = float64(maxVal)
+    }
+
+	return &Array{
+		data: data,
+		shape: []int{len(data), 1},
+		strides: getStrides([]int{len(data), 1}),
+	}, nil
+}
+
 func (a *Array) Shape() []int {
 	return a.shape
 }
